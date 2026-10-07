@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickLink P2P Chat - Güvenli & Anlık Mesajlaşma</title>
+    <title>Sohbetsel - Şifreli P2P Anlık Sohbet</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -25,11 +25,13 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
+                            50: '#f0f3ff',
+                            100: '#e1e7fe',
+                            500: '#4f46e5',
+                            600: '#4338ca',
+                            700: '#3730a3',
+                            800: '#312e81',
+                            900: '#1e1b4b',
                         }
                     }
                 }
@@ -40,125 +42,125 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0b0f19;
+            background-color: #090d16;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(67, 56, 202, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
             background-attachment: fixed;
         }
 
-        /* Glassmorphism Classes */
+        /* Official Glassmorphism Classes */
         .glass-panel {
-            background: rgba(17, 24, 39, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.6);
+            background: rgba(30, 41, 59, 0.55);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.5);
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.25);
             border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.5);
         }
 
-        /* Typing indicator animation dots */
+        /* Typing indicator dots */
         @keyframes typing {
-            0%, 100% { transform: translateY(0); opacity: 0.4; }
-            50% { transform: translateY(-4px); opacity: 1; }
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-3px); opacity: 1; }
         }
         .dot-1 { animation: typing 1.2s infinite 0s; }
         .dot-2 { animation: typing 1.2s infinite 0.2s; }
         .dot-3 { animation: typing 1.2s infinite 0.4s; }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+<body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-brand-600 selection:text-white">
 
-    <!-- Üst Header / Navigasyon Barı -->
-    <header class="w-full glass-panel sticky top-0 z-30 px-4 py-3 shadow-lg border-b border-slate-800">
+    <!-- Üst Kurumsal Header -->
+    <header class="w-full glass-panel sticky top-0 z-30 px-4 py-3 shadow-xl border-b border-slate-800/80">
         <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <!-- Logo & Uygulama Adı -->
+            <!-- Logo & Marka -->
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                    <i class="fa-solid fa-bolt text-lg"></i>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-900/30">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-white flex items-center gap-2">
-                        QuickLink <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">P2P</span>
+                    <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
+                        Sohbetsel <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">P2P Secure</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Sunucusuz & Şifreli Direkt Mesajlaşma</p>
+                    <p class="text-[11px] text-slate-400 font-medium">Uçtan Uca Doğrudan Mesajlaşma</p>
                 </div>
             </div>
 
-            <!-- Bağlantı Durum Göstergesi -->
-            <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-medium transition-all">
+            <!-- Bağlantı Durum Rozeti -->
+            <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold transition-all">
                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                <span id="statusText">Oda Hazırlanıyor...</span>
+                <span id="statusText">Oda Kuruluyor...</span>
             </div>
 
-            <!-- Sağ Aksiyonlar: Link Kopyala & Kullanıcı Ayarları -->
+            <!-- Sağ Aksiyon Butonları -->
             <div class="flex items-center gap-2">
-                <button id="copyLinkBtn" onclick="copyShareLink()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition shadow-lg shadow-indigo-600/30 active:scale-95">
-                    <i class="fa-solid fa-link"></i>
+                <button id="copyLinkBtn" onclick="copyShareLink()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-950/50 active:scale-95">
+                    <i class="fa-solid fa-link text-xs"></i>
                     <span class="hidden sm:inline">Sohbet Linkini Kopyala</span>
                 </button>
-                <button onclick="toggleProfileModal()" class="w-9 h-9 rounded-xl glass-card flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Rumuz Değiştir">
-                    <i class="fa-solid fa-user-gear"></i>
+                <button onclick="toggleProfileModal()" class="w-9 h-9 rounded-xl glass-card flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Rumuz Ayarları">
+                    <i class="fa-solid fa-user-gear text-sm"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Ana Mesajlaşma Alanı -->
+    <!-- Ana Sohbet Alanı -->
     <main class="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-4 flex flex-col justify-between gap-3 h-[calc(100vh-70px)]">
         
-        <!-- Üst Davet / Bilgi Kutusu (Eğer henüz kimse bağlanmadıysa görünür) -->
-        <div id="welcomeCard" class="glass-card rounded-2xl p-4 sm:p-6 text-center border border-indigo-500/20 relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-            <div class="max-w-md mx-auto space-y-3">
-                <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-xl">
-                    <i class="fa-solid fa-user-plus"></i>
+        <!-- Karşılama ve Davet Kutusu (Bağlantı kurulmadığında gösterilir) -->
+        <div id="welcomeCard" class="glass-card rounded-2xl p-5 sm:p-7 text-center border border-indigo-500/20 relative overflow-hidden shadow-2xl">
+            <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl"></div>
+            <div class="max-w-md mx-auto space-y-3.5 relative z-10">
+                <div class="w-12 h-12 bg-indigo-500/15 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-indigo-500/20">
+                    <i class="fa-solid fa-paper-plane"></i>
                 </div>
-                <h2 class="text-base sm:text-lg font-semibold text-white">Sohbete Birini Davet Edin</h2>
-                <p class="text-xs sm:text-sm text-slate-400">
-                    Bu sohbet odası tamamen geçicidir. Mesajlar iki cihaz arasında doğrudan akar ve sunucuda saklanmaz. Aşağıdaki linki kopyalayıp arkadaşınıza gönderin.
+                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Sohbetsel Odasına Davet Et</h2>
+                <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                    Bu sohbet kanalı tamamen geçicidir. Mesajlar veritabanında veya sunucuda saklanmaz; doğrudan iki cihaz arasında akış sağlar. Sayfayı kapattığınızda veriler tamamen silinir.
                 </p>
-                <div class="flex items-center gap-2 bg-slate-900/80 p-1.5 pl-3 rounded-xl border border-slate-800 text-xs text-slate-300">
+                <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 pl-3.5 rounded-xl border border-slate-800 text-xs text-slate-300">
                     <input id="roomUrlInput" type="text" readonly class="bg-transparent border-none outline-none flex-1 text-slate-400 select-all font-mono text-xs">
-                    <button onclick="copyShareLink()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-3 py-1.5 rounded-lg transition active:scale-95 shrink-0">
+                    <button onclick="copyShareLink()" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-3.5 py-1.5 rounded-lg transition active:scale-95 shrink-0">
                         <i class="fa-regular fa-copy mr-1"></i> Kopyala
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Sohbet Mesaj Listesi Konteyneri -->
-        <div id="chatMessages" class="flex-1 glass-card rounded-2xl p-4 overflow-y-auto space-y-4 flex flex-col">
-            <!-- Sistem Hoşgeldiniz Mesajı -->
+        <!-- Mesaj Akış Konteyneri -->
+        <div id="chatMessages" class="flex-1 glass-card rounded-2xl p-4 overflow-y-auto space-y-4 flex flex-col shadow-inner">
+            <!-- Sistem Bilgilendirme Etiketi -->
             <div class="text-center my-2">
-                <span class="text-[11px] font-medium bg-slate-800/80 text-slate-400 px-3 py-1 rounded-full border border-slate-700/50">
-                    <i class="fa-solid fa-lock text-indigo-400 mr-1"></i> Uçtan uca P2P bağlantı ortamı oluşturuldu.
+                <span class="text-[11px] font-medium bg-slate-800/80 text-slate-400 px-3.5 py-1 rounded-full border border-slate-700/50">
+                    <i class="fa-solid fa-lock text-indigo-400 mr-1.5"></i> Sohbetsel uçtan uca güvenli P2P kanalı hazır.
                 </span>
             </div>
-            <!-- Dinamik mesajlar buraya eklenecek -->
         </div>
 
         <!-- "Yazıyor..." Canlı İndikatörü -->
-        <div id="typingIndicator" class="hidden items-center gap-2 text-xs text-slate-400 px-2 py-1">
+        <div id="typingIndicator" class="hidden items-center gap-2 text-xs text-slate-400 px-2 py-0.5">
             <span id="typingUser" class="font-medium text-indigo-400">Karşı taraf</span> yazıyor
             <div class="flex items-center gap-1">
                 <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-1"></span>
@@ -167,10 +169,10 @@
             </div>
         </div>
 
-        <!-- Alt Mesaj Yazma Alanı -->
-        <div class="glass-panel rounded-2xl p-2 sm:p-3 relative z-20">
-            <!-- Emoji Seçici Popover -->
-            <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl border border-slate-700 shadow-2xl grid grid-cols-6 sm:grid-cols-8 gap-2 max-w-xs sm:max-w-sm z-30">
+        <!-- Alt Mesaj Input Barı -->
+        <div class="glass-panel rounded-2xl p-2 sm:p-2.5 relative z-20 shadow-2xl">
+            <!-- Emoji Paneli -->
+            <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl border border-slate-700/80 shadow-2xl grid grid-cols-6 sm:grid-cols-8 gap-2 max-w-xs sm:max-w-sm z-30 animate-in fade-in zoom-in duration-150">
                 <button onclick="insertEmoji('😊')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😊</button>
                 <button onclick="insertEmoji('😂')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😂</button>
                 <button onclick="insertEmoji('❤️')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">❤️</button>
@@ -185,57 +187,57 @@
                 <button onclick="insertEmoji('✨')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">✨</button>
                 <button onclick="insertEmoji('💯')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">💯</button>
                 <button onclick="insertEmoji('😅')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😅</button>
-                <button onclick="insertEmoji('💩')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">💩</button>
                 <button onclick="insertEmoji('🤝')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🤝</button>
+                <button onclick="insertEmoji('👌')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">👌</button>
             </div>
 
             <form id="chatForm" onsubmit="handleSend(event)" class="flex items-center gap-2">
                 <!-- Emoji Butonu -->
-                <button type="button" onclick="toggleEmojiPicker()" class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition shrink-0">
+                <button type="button" onclick="toggleEmojiPicker()" class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 transition shrink-0" title="Emoji Ekle">
                     <i class="fa-regular fa-face-smile text-lg"></i>
                 </button>
 
-                <!-- Resim Ekleme Butonu -->
-                <label class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition cursor-pointer shrink-0">
+                <!-- Resim/Görsel Yükleme Butonu -->
+                <label class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 transition cursor-pointer shrink-0" title="Görsel Paylaş">
                     <i class="fa-solid fa-image text-lg"></i>
                     <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
                 </label>
 
-                <!-- Metin Girdisi -->
-                <input id="messageInput" type="text" placeholder="Mesajınızı yazın..." autocomplete="off" oninput="handleTyping()"
-                    class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-2.5 outline-none border border-slate-700/60 focus:border-indigo-500 transition">
+                <!-- Mesaj Giriş Alanı -->
+                <input id="messageInput" type="text" placeholder="Sohbetsel mesajınızı yazın..." autocomplete="off" oninput="handleTyping()"
+                    class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-2.5 outline-none border border-slate-700/60 focus:border-brand-500 transition">
 
-                <!-- Gönder Butonu -->
-                <button type="submit" id="sendBtn" class="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 transition active:scale-95 shrink-0">
-                    <i class="fa-solid fa-paper-plane"></i>
+                <!-- Mesaj Gönder Butonu -->
+                <button type="submit" id="sendBtn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-indigo-950/50 transition active:scale-95 shrink-0" title="Gönder">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
                 </button>
             </form>
         </div>
     </main>
 
-    <!-- Rumuz Değiştirme Modalı -->
-    <div id="profileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-sm w-full p-6 rounded-2xl space-y-4 border border-slate-700 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div class="flex items-center justify-between">
+    <!-- Rumuz Ayarlama Modalı -->
+    <div id="profileModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-sm w-full p-6 rounded-2xl space-y-4 border border-slate-700/80 shadow-2xl animate-in fade-in zoom-in duration-150">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 class="font-bold text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-user-pen text-indigo-400"></i> Rumuz Belirle
+                    <i class="fa-solid fa-user-pen text-brand-500"></i> Profil Ayarları
                 </h3>
                 <button onclick="toggleProfileModal()" class="text-slate-400 hover:text-white transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div>
-                <label class="text-xs text-slate-400 block mb-1">Sohbetlerde görünecek adınız:</label>
-                <input type="text" id="nicknameInput" maxlength="20" class="w-full bg-slate-900 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 outline-none border border-slate-700 focus:border-indigo-500">
+                <label class="text-xs text-slate-400 block mb-1.5 font-medium">Sohbetsel Odasındaki Rumuzunuz:</label>
+                <input type="text" id="nicknameInput" maxlength="20" class="w-full bg-slate-900 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 outline-none border border-slate-700 focus:border-brand-500 transition">
             </div>
             <div class="flex justify-end gap-2 pt-2">
-                <button onclick="toggleProfileModal()" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">İptal</button>
-                <button onclick="saveNickname()" class="px-4 py-2 rounded-xl text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 transition">Kaydet</button>
+                <button onclick="toggleProfileModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">İptal</button>
+                <button onclick="saveNickname()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-500 transition shadow-lg shadow-brand-900/30">Kaydet</button>
             </div>
         </div>
     </div>
 
-    <!-- Bildirim Toast Kutusu -->
+    <!-- Bildirim Toast Alanı -->
     <div id="toastContainer" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <script>
@@ -248,7 +250,7 @@
         let isHost = false;
         let typingTimeout = null;
 
-        // --- Sayfa Yüklendiğinde Başlatma ---
+        // --- Başlatıcı Fonksiyon ---
         window.onload = () => {
             document.getElementById('nicknameInput').value = myNickname;
             initRoomAndPeer();
@@ -260,7 +262,7 @@
             let roomParam = urlParams.get('room') || window.location.hash.substring(1);
 
             if (!roomParam) {
-                // Yeni bir rastgele oda kodu üret
+                // Benzersiz oda kodu üret
                 roomId = generateRandomRoomId();
                 window.history.replaceState({}, '', `?room=${roomId}`);
             } else {
@@ -271,33 +273,32 @@
             const shareUrl = window.location.href;
             document.getElementById('roomUrlInput').value = shareUrl;
 
-            // PeerJS ID Öneki (Diğer uygulamalarla çakışmaması için)
-            const peerRoomId = `qlink-p2p-${roomId}`;
+            // PeerJS ID Öneki (Sohbetsel Kimliği)
+            const peerRoomId = `sohbetsel-p2p-${roomId}`;
 
             updateStatus('connecting', 'Sunucuya Bağlanılıyor...');
 
-            // İlk olarak Host olarak bağlanmayı dene
+            // İlk olarak Oda Sahibi (Host) olarak başlat
             peer = new Peer(peerRoomId, {
                 debug: 1
             });
 
             peer.on('open', (id) => {
                 isHost = true;
-                updateStatus('waiting', 'Oda Kuruldu. Bağlantı Bekleniyor...');
+                updateStatus('waiting', 'Oda Hazır. Bağlantı Bekleniyor...');
                 
-                // Gelen bağlantıları dinle
+                // Bağlanacak kullanıcıyı dinle
                 peer.on('connection', (c) => {
                     conn = c;
                     setupDataConnection();
                 });
             });
 
-            // Eğer bu ID zaten alınmışsa -> Demek ki karşı taraf odayı kurmuş, biz "Guest" (Misafir)iz!
+            // Eğer Oda Kodu Zaten Kullanımdaysa -> Katılımcı (Guest) olarak bağlan
             peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Host zaten mevcut, biz rastgele bir ID ile bağlanalım
                     peer.destroy();
-                    peer = new Peer(); // PeerJS bize rastgele ID versin
+                    peer = new Peer(); // Yeni dinamik ID al
 
                     peer.on('open', () => {
                         isHost = false;
@@ -307,27 +308,27 @@
                     });
 
                     peer.on('error', (pErr) => {
-                        updateStatus('error', 'Bağlantı Hatası!');
-                        showToast('Bağlantı sırasında bir hata oluştu: ' + pErr.type, 'error');
+                        updateStatus('error', 'Bağlantı Başarısız!');
+                        showToast('Bağlantı hatası: ' + pErr.type, 'error');
                     });
                 } else {
-                    updateStatus('error', 'Bağlantı Hatası');
-                    showToast('PeerJS Hatası: ' + err.type, 'error');
+                    updateStatus('error', 'Hata Oluştu');
+                    showToast('Sohbetsel PeerJS Hatası: ' + err.type, 'error');
                 }
             });
         }
 
-        // --- Veri Kanalı (DataChannel) Olayları ---
+        // --- WebRTC Veri Kanalı (DataChannel) ---
         function setupDataConnection() {
             if (!conn) return;
 
             conn.on('open', () => {
-                updateStatus('connected', 'Sohbet Bağlantısı Kuruldu');
+                updateStatus('connected', 'Sohbet Bağlantısı Aktif');
                 document.getElementById('welcomeCard').classList.add('hidden');
-                showToast('Bağlantı sağlandı! Sohbet edebilirsiniz.', 'success');
+                showToast('Sohbetsel P2P bağlantısı başarıyla kuruldu!', 'success');
                 playChimeSound();
 
-                // İlk el sıkışmada (Handshake) rumuzumuzu gönderelim
+                // Rumuz Bilgisini Gönder
                 conn.send({
                     type: 'profile',
                     nickname: myNickname
@@ -340,15 +341,15 @@
 
             conn.on('close', () => {
                 updateStatus('disconnected', 'Bağlantı Koptu');
-                showToast('Karşı tarafın sohbet bağlantısı kesildi.', 'warning');
+                showToast('Karşı tarafın Sohbetsel bağlantısı kesildi.', 'warning');
             });
 
             conn.on('error', (err) => {
-                showToast('Veri aktarım hatası oluştu.', 'error');
+                showToast('Veri akışında hata oluştu.', 'error');
             });
         }
 
-        // --- Gelen Verileri İşleme ---
+        // Gelen Veri Paketlerini İşleme
         function handleIncomingData(data) {
             if (!data || !data.type) return;
 
@@ -356,7 +357,7 @@
                 case 'profile':
                     peerNickname = data.nickname || 'Karşı Taraf';
                     document.getElementById('typingUser').innerText = peerNickname;
-                    appendSystemMessage(`${peerNickname} sohbete katıldı.`);
+                    appendSystemMessage(`${peerNickname} Sohbetsel odasına bağlandı.`);
                     break;
 
                 case 'text':
@@ -385,7 +386,7 @@
             }
         }
 
-        // --- Mesaj Gönderme İşlemleri ---
+        // Mesaj Gönderme İşlemi
         function handleSend(e) {
             e.preventDefault();
             const input = document.getElementById('messageInput');
@@ -394,20 +395,20 @@
             if (!message) return;
 
             if (!conn || !conn.open) {
-                showToast('Henüz bir kullanıcıyla bağlantı kurulmadı! Lütfen linki paylaşın.', 'warning');
+                showToast('Henüz odaya bağlı bir kullanıcı yok! Lütfen sohbet linkini kopyalayıp paylaşın.', 'warning');
                 return;
             }
 
             const timeStr = getCurrentTime();
 
-            // Karşı tarafa gönder
+            // Karşı tarafa ilet
             conn.send({
                 type: 'text',
                 content: message,
                 time: timeStr
             });
 
-            // Kendi ekranımıza ekle
+            // Kendi ekranında göster
             appendMessage({
                 sender: myNickname,
                 content: message,
@@ -420,18 +421,18 @@
             sendTypingStatus(false);
         }
 
-        // Görsel Seçme ve Base64'e Çevirip Gönderme
+        // Görsel Paylaşımı
         function handleImageSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             if (!conn || !conn.open) {
-                showToast('Resim göndermek için bağlı bir kullanıcı olmalıdır.', 'warning');
+                showToast('Görsel göndermek için bağlı bir üye olmalıdır.', 'warning');
                 return;
             }
 
-            if (file.size > 3 * 1024 * 1024) { // Max 3MB
-                showToast('Lütfen 3MB\'tan küçük bir resim seçin.', 'warning');
+            if (file.size > 3 * 1024 * 1024) {
+                showToast('Dosya boyutu çok yüksek. Maksimum 3MB gönderebilirsiniz.', 'warning');
                 return;
             }
 
@@ -453,28 +454,28 @@
                     isMe: true
                 });
 
-                showToast('Görsel gönderildi.', 'info');
+                showToast('Görsel başarıyla iletildi.', 'info');
             };
             reader.readAsDataURL(file);
-            e.target.value = ''; // Reset input
+            e.target.value = '';
         }
 
-        // --- Mesaj Arayüzünü Güncelleme ---
+        // Arayüze Mesaj Ekleme
         function appendMessage({ sender, content, time, isMe }) {
             const container = document.getElementById('chatMessages');
             const msgDiv = document.createElement('div');
             msgDiv.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 animate-in fade-in duration-150`;
 
             const bubbleBg = isMe 
-                ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/10' 
+                ? 'bg-gradient-to-r from-brand-700 to-indigo-600 text-white rounded-2xl rounded-tr-none shadow-md shadow-indigo-950/30' 
                 : 'glass-panel text-slate-100 rounded-2xl rounded-tl-none border border-slate-700/60';
 
             msgDiv.innerHTML = `
-                <span class="text-[10px] text-slate-400 px-1 font-medium">${escapeHTML(sender)}</span>
+                <span class="text-[10px] text-slate-400 px-1 font-semibold">${escapeHTML(sender)}</span>
                 <div class="max-w-[85%] sm:max-w-[70%] px-4 py-2.5 ${bubbleBg} break-words text-sm leading-relaxed">
                     ${escapeHTML(content)}
                 </div>
-                <span class="text-[9px] text-slate-500 px-1">${time}</span>
+                <span class="text-[9px] text-slate-500 px-1 font-mono">${time}</span>
             `;
 
             container.appendChild(msgDiv);
@@ -489,11 +490,11 @@
             const borderStyle = isMe ? 'border-indigo-500/30' : 'border-slate-700/60';
 
             msgDiv.innerHTML = `
-                <span class="text-[10px] text-slate-400 px-1 font-medium">${escapeHTML(sender)}</span>
-                <div class="max-w-[85%] sm:max-w-[60%] p-1.5 glass-card rounded-2xl ${borderStyle} overflow-hidden shadow-lg">
-                    <img src="${imageData}" alt="Gönderilen Görsel" class="rounded-xl w-full max-h-72 object-cover cursor-pointer hover:opacity-95 transition" onclick="window.open('${imageData}')">
+                <span class="text-[10px] text-slate-400 px-1 font-semibold">${escapeHTML(sender)}</span>
+                <div class="max-w-[85%] sm:max-w-[60%] p-1.5 glass-card rounded-2xl ${borderStyle} overflow-hidden shadow-xl">
+                    <img src="${imageData}" alt="Paylaşılan Görsel" class="rounded-xl w-full max-h-72 object-cover cursor-pointer hover:opacity-90 transition" onclick="window.open('${imageData}')">
                 </div>
-                <span class="text-[9px] text-slate-500 px-1">${time}</span>
+                <span class="text-[9px] text-slate-500 px-1 font-mono">${time}</span>
             `;
 
             container.appendChild(msgDiv);
@@ -505,15 +506,15 @@
             const sysDiv = document.createElement('div');
             sysDiv.className = 'text-center my-2 animate-in fade-in duration-200';
             sysDiv.innerHTML = `
-                <span class="text-[11px] font-medium bg-slate-800/60 text-slate-400 px-3 py-1 rounded-full border border-slate-700/40">
-                    <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> ${escapeHTML(text)}
+                <span class="text-[11px] font-medium bg-slate-800/60 text-slate-400 px-3.5 py-1 rounded-full border border-slate-700/40">
+                    <i class="fa-solid fa-circle-info text-indigo-400 mr-1.5"></i> ${escapeHTML(text)}
                 </span>
             `;
             container.appendChild(sysDiv);
             scrollToBottom();
         }
 
-        // --- "Yazıyor..." Göstergesi Logic ---
+        // "Yazıyor..." Bilgisi
         function handleTyping() {
             if (!conn || !conn.open) return;
             sendTypingStatus(true);
@@ -545,7 +546,68 @@
             scrollToBottom();
         }
 
-        // --- Yardımcı Araçlar & UI Güncellemeleri ---
+        // Ses Efekti (Web Audio API Chime)
+        function playChimeSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.09); // G5
+
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {
+                // AudioContext engellenirse sessiz geç
+            }
+        }
+
+        // Toast Bildirim Kutusu
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            let bg = 'bg-slate-900/90 text-slate-100 border-slate-700';
+            let icon = 'fa-circle-info text-indigo-400';
+
+            if (type === 'success') {
+                bg = 'bg-slate-900/95 text-emerald-300 border-emerald-500/30';
+                icon = 'fa-circle-check text-emerald-400';
+            } else if (type === 'error') {
+                bg = 'bg-slate-900/95 text-rose-300 border-rose-500/30';
+                icon = 'fa-circle-exclamation text-rose-400';
+            } else if (type === 'warning') {
+                bg = 'bg-slate-900/95 text-amber-300 border-amber-500/30';
+                icon = 'fa-triangle-exclamation text-amber-400';
+            }
+
+            toast.className = `flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bg}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${escapeHTML(message)}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Bağlantı Durumu Rozeti
         function updateStatus(state, text) {
             const badge = document.getElementById('statusBadge');
             const statusText = document.getElementById('statusText');
@@ -553,25 +615,24 @@
             statusText.innerText = text;
 
             if (state === 'connecting' || state === 'waiting') {
-                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-medium';
+                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold';
                 badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
             } else if (state === 'connected') {
-                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium';
+                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold';
                 badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-emerald-400';
             } else {
-                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-medium';
+                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold';
                 badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-rose-400';
             }
         }
 
-        // Sohbet Linkini Kopyalama
+        // Link Kopyalama
         function copyShareLink() {
             const link = window.location.href;
             
-            // Fallback clipboard logic
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(link).then(() => {
-                    showToast('Sohbet linki panoya kopyalandı!', 'success');
+                    showToast('Sohbetsel oda linki kopyalandı!', 'success');
                 }).catch(() => {
                     copyFallback(link);
                 });
@@ -587,74 +648,12 @@
             dummy.select();
             document.execCommand('copy');
             document.body.removeChild(dummy);
-            showToast('Sohbet linki kopyalandı!', 'success');
+            showToast('Sohbetsel oda linki kopyalandı!', 'success');
         }
 
-        // Web Audio API ile Mesaj Bip / Bildirim Ses Efekti
-        function playChimeSound() {
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
-                
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08); // A5
-
-                gain.gain.setValueAtTime(0.12, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start();
-                osc.stop(ctx.currentTime + 0.25);
-            } catch (e) {
-                // AudioContext kısıtlaması varsa sessizce geç
-            }
-        }
-
-        // Toast Bildirim Sistemi
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-
-            let bg = 'bg-slate-800 text-slate-100 border-slate-700';
-            let icon = 'fa-circle-info text-indigo-400';
-
-            if (type === 'success') {
-                bg = 'bg-slate-900/90 text-emerald-300 border-emerald-500/30';
-                icon = 'fa-circle-check text-emerald-400';
-            } else if (type === 'error') {
-                bg = 'bg-slate-900/90 text-rose-300 border-rose-500/30';
-                icon = 'fa-circle-exclamation text-rose-400';
-            } else if (type === 'warning') {
-                bg = 'bg-slate-900/90 text-amber-300 border-amber-500/30';
-                icon = 'fa-triangle-exclamation text-amber-400';
-            }
-
-            toast.className = `flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-medium shadow-xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bg}`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${escapeHTML(message)}</span>`;
-
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
-        }
-
-        // Emoji Seçici Yönetimi
+        // Emoji İşlemleri
         function toggleEmojiPicker() {
-            const picker = document.getElementById('emojiPicker');
-            picker.classList.toggle('hidden');
+            document.getElementById('emojiPicker').classList.toggle('hidden');
         }
 
         function closeEmojiPicker() {
@@ -668,10 +667,9 @@
             closeEmojiPicker();
         }
 
-        // Modallar & Rumuz Yönetimi
+        // Rumuz Ayarları
         function toggleProfileModal() {
-            const modal = document.getElementById('profileModal');
-            modal.classList.toggle('hidden');
+            document.getElementById('profileModal').classList.toggle('hidden');
         }
 
         function saveNickname() {
@@ -684,12 +682,12 @@
                         nickname: myNickname
                     });
                 }
-                showToast(`Rumuzunuz "${myNickname}" olarak güncellendi.`, 'success');
+                showToast(`Sohbetsel rumuzunuz "${myNickname}" olarak güncellendi.`, 'success');
             }
             toggleProfileModal();
         }
 
-        // Diğer Genel Yardımcılar
+        // Yardımcı Genel Metotlar
         function generateRandomRoomId() {
             return Math.random().toString(36).substring(2, 8);
         }
