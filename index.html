@@ -1,711 +1,474 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohbetsel - Şifreli P2P Anlık Sohbet</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PeerJS WebRTC CDN -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f3ff',
-                            100: '#e1e7fe',
-                            500: '#4f46e5',
-                            600: '#4338ca',
-                            700: '#3730a3',
-                            800: '#312e81',
-                            900: '#1e1b4b',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
+    <title>Notlarım</title>
+    <!-- P2P Bağlantısı için PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #090d16;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(67, 56, 202, 0.12) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
+        /* GENEL AYARLAR */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f4f9; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
 
-        /* Official Glassmorphism Classes */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.82);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-        }
+        /* MASKE: NOT DEFTERİ TASARIMI */
+        #notepad-app { height: 100vh; background-color: #fdfdfd; display: flex; flex-direction: column; }
+        .np-header { background-color: #ffcc00; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; cursor: pointer; user-select: none; }
+        .np-search { padding: 15px; background: #eee; }
+        .np-search input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        .np-notes { flex: 1; padding: 20px; overflow-y: auto; background: repeating-linear-gradient(#fdfdfd, #fdfdfd 29px, #e1e1e1 30px); line-height: 30px; font-size: 18px; color: #333; }
+        .np-fab { position: absolute; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; color: black; font-weight: bold; }
 
-        .glass-card {
-            background: rgba(30, 41, 59, 0.55);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.25);
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.5);
-        }
-
-        /* Typing indicator dots */
-        @keyframes typing {
-            0%, 100% { transform: translateY(0); opacity: 0.3; }
-            50% { transform: translateY(-3px); opacity: 1; }
-        }
-        .dot-1 { animation: typing 1.2s infinite 0s; }
-        .dot-2 { animation: typing 1.2s infinite 0.2s; }
-        .dot-3 { animation: typing 1.2s infinite 0.4s; }
+        /* GİZLİ SOHBETSEL TASARIMI */
+        #chat-app { height: 100vh; background-color: #0d1117; color: #c9d1d9; display: flex; flex-direction: column; }
+        .chat-header { background-color: #161b22; padding: 15px 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        .chat-title { font-size: 20px; font-weight: bold; color: #58a6ff; }
+        .status { font-size: 12px; color: #8b949e; margin-top: 5px; }
+        .copy-btn { background-color: #238636; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 10px 15px; border-radius: 12px; font-size: 15px; word-wrap: break-word; }
+        .msg.sent { background-color: #1f6feb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background-color: #21262d; color: #c9d1d9; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #30363d; }
+        
+        .chat-input-area { padding: 15px; background-color: #161b22; border-top: 1px solid #30363d; display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 12px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; font-size: 15px; outline: none; }
+        .chat-input-area button { background-color: #1f6feb; color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-brand-600 selection:text-white">
+<body>
 
-    <!-- Üst Kurumsal Header -->
-    <header class="w-full glass-panel sticky top-0 z-30 px-4 py-3 shadow-xl border-b border-slate-800/80">
-        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <!-- Logo & Marka -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-900/30">
-                    <i class="fa-solid fa-shield-halved text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-                        Sohbetsel <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">P2P Secure</span>
-                    </h1>
-                    <p class="text-[11px] text-slate-400 font-medium">Uçtan Uca Doğrudan Mesajlaşma</p>
-                </div>
-            </div>
-
-            <!-- Bağlantı Durum Rozeti -->
-            <div id="statusBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold transition-all">
-                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                <span id="statusText">Oda Kuruluyor...</span>
-            </div>
-
-            <!-- Sağ Aksiyon Butonları -->
-            <div class="flex items-center gap-2">
-                <button id="copyLinkBtn" onclick="copyShareLink()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-950/50 active:scale-95">
-                    <i class="fa-solid fa-link text-xs"></i>
-                    <span class="hidden sm:inline">Sohbet Linkini Kopyala</span>
-                </button>
-                <button onclick="toggleProfileModal()" class="w-9 h-9 rounded-xl glass-card flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Rumuz Ayarları">
-                    <i class="fa-solid fa-user-gear text-sm"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Ana Sohbet Alanı -->
-    <main class="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-4 flex flex-col justify-between gap-3 h-[calc(100vh-70px)]">
+    <!-- 1. GÖRÜNÜM: SAHTE NOT DEFTERİ -->
+    <div id="notepad-app">
+        <!-- Gizli Tetikleyici: Bu başlığa 3 kere tıklanacak -->
+        <div class="np-header" id="np-header">📝 Notlarım</div>
         
-        <!-- Karşılama ve Davet Kutusu (Bağlantı kurulmadığında gösterilir) -->
-        <div id="welcomeCard" class="glass-card rounded-2xl p-5 sm:p-7 text-center border border-indigo-500/20 relative overflow-hidden shadow-2xl">
-            <div class="absolute -right-12 -bottom-12 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl"></div>
-            <div class="max-w-md mx-auto space-y-3.5 relative z-10">
-                <div class="w-12 h-12 bg-indigo-500/15 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-indigo-500/20">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </div>
-                <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">Sohbetsel Odasına Davet Et</h2>
-                <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                    Bu sohbet kanalı tamamen geçicidir. Mesajlar veritabanında veya sunucuda saklanmaz; doğrudan iki cihaz arasında akış sağlar. Sayfayı kapattığınızda veriler tamamen silinir.
-                </p>
-                <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 pl-3.5 rounded-xl border border-slate-800 text-xs text-slate-300">
-                    <input id="roomUrlInput" type="text" readonly class="bg-transparent border-none outline-none flex-1 text-slate-400 select-all font-mono text-xs">
-                    <button onclick="copyShareLink()" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-3.5 py-1.5 rounded-lg transition active:scale-95 shrink-0">
-                        <i class="fa-regular fa-copy mr-1"></i> Kopyala
-                    </button>
-                </div>
-            </div>
+        <div class="np-search">
+            <!-- Gizli Tetikleyici: Buraya 1234 yazılacak -->
+            <input type="text" id="np-search-input" placeholder="Notlarda ara...">
         </div>
-
-        <!-- Mesaj Akış Konteyneri -->
-        <div id="chatMessages" class="flex-1 glass-card rounded-2xl p-4 overflow-y-auto space-y-4 flex flex-col shadow-inner">
-            <!-- Sistem Bilgilendirme Etiketi -->
-            <div class="text-center my-2">
-                <span class="text-[11px] font-medium bg-slate-800/80 text-slate-400 px-3.5 py-1 rounded-full border border-slate-700/50">
-                    <i class="fa-solid fa-lock text-indigo-400 mr-1.5"></i> Sohbetsel uçtan uca güvenli P2P kanalı hazır.
-                </span>
-            </div>
+        <div class="np-notes">
+            Marketten alınacaklar...<br>
+            Fizik formülleri özeti.<br>
+            Toplantı notları 14:00<br>
         </div>
+        <div class="np-fab">+</div>
+    </div>
 
-        <!-- "Yazıyor..." Canlı İndikatörü -->
-        <div id="typingIndicator" class="hidden items-center gap-2 text-xs text-slate-400 px-2 py-0.5">
-            <span id="typingUser" class="font-medium text-indigo-400">Karşı taraf</span> yazıyor
-            <div class="flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-1"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-2"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-3"></span>
-            </div>
-        </div>
-
-        <!-- Alt Mesaj Input Barı -->
-        <div class="glass-panel rounded-2xl p-2 sm:p-2.5 relative z-20 shadow-2xl">
-            <!-- Emoji Paneli -->
-            <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl border border-slate-700/80 shadow-2xl grid grid-cols-6 sm:grid-cols-8 gap-2 max-w-xs sm:max-w-sm z-30 animate-in fade-in zoom-in duration-150">
-                <button onclick="insertEmoji('😊')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😊</button>
-                <button onclick="insertEmoji('😂')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😂</button>
-                <button onclick="insertEmoji('❤️')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">❤️</button>
-                <button onclick="insertEmoji('👍')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">👍</button>
-                <button onclick="insertEmoji('🔥')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🔥</button>
-                <button onclick="insertEmoji('🎉')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🎉</button>
-                <button onclick="insertEmoji('🤔')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🤔</button>
-                <button onclick="insertEmoji('😎')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😎</button>
-                <button onclick="insertEmoji('🙏')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🙏</button>
-                <button onclick="insertEmoji('🚀')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🚀</button>
-                <button onclick="insertEmoji('👋')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">👋</button>
-                <button onclick="insertEmoji('✨')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">✨</button>
-                <button onclick="insertEmoji('💯')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">💯</button>
-                <button onclick="insertEmoji('😅')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">😅</button>
-                <button onclick="insertEmoji('🤝')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">🤝</button>
-                <button onclick="insertEmoji('👌')" class="hover:bg-slate-800 p-1.5 rounded-lg text-lg transition">👌</button>
-            </div>
-
-            <form id="chatForm" onsubmit="handleSend(event)" class="flex items-center gap-2">
-                <!-- Emoji Butonu -->
-                <button type="button" onclick="toggleEmojiPicker()" class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 transition shrink-0" title="Emoji Ekle">
-                    <i class="fa-regular fa-face-smile text-lg"></i>
-                </button>
-
-                <!-- Resim/Görsel Yükleme Butonu -->
-                <label class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 transition cursor-pointer shrink-0" title="Görsel Paylaş">
-                    <i class="fa-solid fa-image text-lg"></i>
-                    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-                </label>
-
-                <!-- Mesaj Giriş Alanı -->
-                <input id="messageInput" type="text" placeholder="Sohbetsel mesajınızı yazın..." autocomplete="off" oninput="handleTyping()"
-                    class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-4 py-2.5 outline-none border border-slate-700/60 focus:border-brand-500 transition">
-
-                <!-- Mesaj Gönder Butonu -->
-                <button type="submit" id="sendBtn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-indigo-950/50 transition active:scale-95 shrink-0" title="Gönder">
-                    <i class="fa-solid fa-paper-plane text-sm"></i>
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <!-- Rumuz Ayarlama Modalı -->
-    <div id="profileModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-sm w-full p-6 rounded-2xl space-y-4 border border-slate-700/80 shadow-2xl animate-in fade-in zoom-in duration-150">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-user-pen text-brand-500"></i> Profil Ayarları
-                </h3>
-                <button onclick="toggleProfileModal()" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+    <!-- 2. GÖRÜNÜM: GERÇEK SOHBETSEL (Başlangıçta gizli) -->
+    <div id="chat-app" class="hidden">
+        <div class="chat-header">
             <div>
-                <label class="text-xs text-slate-400 block mb-1.5 font-medium">Sohbetsel Odasındaki Rumuzunuz:</label>
-                <input type="text" id="nicknameInput" maxlength="20" class="w-full bg-slate-900 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 outline-none border border-slate-700 focus:border-brand-500 transition">
+                <div class="chat-title">Sohbetsel</div>
+                <div class="status" id="status-text">Sistem başlatılıyor...</div>
             </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="toggleProfileModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">İptal</button>
-                <button onclick="saveNickname()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-500 transition shadow-lg shadow-brand-900/30">Kaydet</button>
-            </div>
+            <button class="copy-btn" id="copy-btn">Sohbet Linkini Kopyala</button>
+        </div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msg-input" placeholder="Güvenli mesaj yaz..." autocomplete="off">
+            <button id="send-btn">Gönder</button>
         </div>
     </div>
 
-    <!-- Bildirim Toast Alanı -->
-    <div id="toastContainer" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
     <script>
-        // --- Uygulama Durum Değişkenleri ---
-        let peer = null;
-        let conn = null;
-        let myNickname = 'Kullanıcı_' + Math.floor(Math.random() * 8999 + 1000);
-        let peerNickname = 'Karşı Taraf';
-        let roomId = '';
-        let isHost = false;
-        let typingTimeout = null;
+        // ----------------------------------------------------
+        // MASKE (GİZLENME) KODLARI
+        // ----------------------------------------------------
+        const notepadApp = document.getElementById('notepad-app');
+        const chatApp = document.getElementById('chat-app');
+        const header = document.getElementById('np-header');
+        const searchInput = document.getElementById('np-search-input');
+        
+        let clickCount = 0;
+        let clickTimer;
 
-        // --- Başlatıcı Fonksiyon ---
-        window.onload = () => {
-            document.getElementById('nicknameInput').value = myNickname;
-            initRoomAndPeer();
-        };
+        // Sohbeti Gösteren Fonksiyon
+        function revealChat() {
+            notepadApp.classList.add('hidden');
+            chatApp.classList.remove('hidden');
+            document.title = "Sohbetsel - Güvenli"; // Sekme adını değiştir
+            initChat(); // PeerJS'i başlat
+        }
 
-        // --- Oda Kodu Yönetimi & PeerJS Bağlantısı ---
-        function initRoomAndPeer() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let roomParam = urlParams.get('room') || window.location.hash.substring(1);
-
-            if (!roomParam) {
-                // Benzersiz oda kodu üret
-                roomId = generateRandomRoomId();
-                window.history.replaceState({}, '', `?room=${roomId}`);
-            } else {
-                roomId = roomParam;
+        // Yöntem 1: Başlığa 3 kez tıklama
+        header.addEventListener('click', () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+            if (clickCount >= 3) {
+                revealChat();
+                clickCount = 0;
             }
+            clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
+        });
 
-            // Arayüzdeki Link Kutularını Güncelle
-            const shareUrl = window.location.href;
-            document.getElementById('roomUrlInput').value = shareUrl;
+        // Yöntem 2: Arama çubuğuna şifre (1234) yazma
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value === '1234') {
+                revealChat();
+                e.target.value = '';
+            }
+        });
 
-            // PeerJS ID Öneki (Sohbetsel Kimliği)
-            const peerRoomId = `sohbetsel-p2p-${roomId}`;
+        // EĞER SİTEYE LİNK İLE GELDİYSE DİREKT SOHBETİ AÇ (Maskeyi Es Geç)
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomToJoin = urlParams.get('room');
+        if (roomToJoin) {
+            revealChat();
+        }
 
-            updateStatus('connecting', 'Sunucuya Bağlanılıyor...');
+        // ----------------------------------------------------
+        // P2P SOHBET (PEERJS) KODLARI
+        // ----------------------------------------------------
+        let peer;
+        let conn;
+        const statusText = document.getElementById('status-text');
+        const messagesDiv = document.getElementById('messages');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        let myRoomId = '';
 
-            // İlk olarak Oda Sahibi (Host) olarak başlat
-            peer = new Peer(peerRoomId, {
-                debug: 1
-            });
+        function initChat() {
+            if (peer) return; // Zaten çalışıyorsa durdur
+            
+            peer = new Peer(); // Ücretsiz P2P sunucusuna bağlan
 
             peer.on('open', (id) => {
-                isHost = true;
-                updateStatus('waiting', 'Oda Hazır. Bağlantı Bekleniyor...');
-                
-                // Bağlanacak kullanıcıyı dinle
-                peer.on('connection', (c) => {
-                    conn = c;
-                    setupDataConnection();
-                });
-            });
-
-            // Eğer Oda Kodu Zaten Kullanımdaysa -> Katılımcı (Guest) olarak bağlan
-            peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    peer.destroy();
-                    peer = new Peer(); // Yeni dinamik ID al
-
-                    peer.on('open', () => {
-                        isHost = false;
-                        updateStatus('connecting', 'Odaya Katılınıyor...');
-                        conn = peer.connect(peerRoomId);
-                        setupDataConnection();
-                    });
-
-                    peer.on('error', (pErr) => {
-                        updateStatus('error', 'Bağlantı Başarısız!');
-                        showToast('Bağlantı hatası: ' + pErr.type, 'error');
-                    });
+                if (roomToJoin) {
+                    // MİSAFİR: Bir linke tıklayarak geldi.
+                    statusText.innerText = "Karşı tarafa bağlanılıyor...";
+                    conn = peer.connect(roomToJoin);
+                    setupConnection();
+                    copyBtn.style.display = 'none'; // Misafirin link kopyalamasına gerek yok
                 } else {
-                    updateStatus('error', 'Hata Oluştu');
-                    showToast('Sohbetsel PeerJS Hatası: ' + err.type, 'error');
+                    // KURUCU: Kendi kendine gizli menüyü açtı.
+                    myRoomId = id;
+                    statusText.innerText = "Link kopyalayıp arkadaşına gönder.";
                 }
             });
+
+            // Kurucu için: Biri linke tıklayıp bağlandığında
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+            });
         }
 
-        // --- WebRTC Veri Kanalı (DataChannel) ---
-        function setupDataConnection() {
-            if (!conn) return;
-
+        function setupConnection() {
+            // Bağlantı başarılı olduğunda
             conn.on('open', () => {
-                updateStatus('connected', 'Sohbet Bağlantısı Aktif');
-                document.getElementById('welcomeCard').classList.add('hidden');
-                showToast('Sohbetsel P2P bağlantısı başarıyla kuruldu!', 'success');
-                playChimeSound();
-
-                // Rumuz Bilgisini Gönder
-                conn.send({
-                    type: 'profile',
-                    nickname: myNickname
-                });
+                statusText.innerText = "Bağlandı! Sohbet gizli ve şifrelidir.";
+                statusText.style.color = "#3fb950"; // Yeşil renk
             });
 
+            // Karşıdan mesaj geldiğinde
             conn.on('data', (data) => {
-                handleIncomingData(data);
+                addMessage(data, 'received');
+                playChime(); // Ses çıkar
             });
-
+            
+            // Karşı taraf çıkarsa
             conn.on('close', () => {
-                updateStatus('disconnected', 'Bağlantı Koptu');
-                showToast('Karşı tarafın Sohbetsel bağlantısı kesildi.', 'warning');
-            });
-
-            conn.on('error', (err) => {
-                showToast('Veri akışında hata oluştu.', 'error');
+                statusText.innerText = "Bağlantı koptu. Karşı taraf sayfayı kapattı.";
+                statusText.style.color = "#f85149"; // Kırmızı renk
             });
         }
 
-        // Gelen Veri Paketlerini İşleme
-        function handleIncomingData(data) {
-            if (!data || !data.type) return;
+        // Ekrana Mesaj Ekleme
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + type;
+            div.innerText = text;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Hep en alta kaydır
+        }
 
-            switch (data.type) {
-                case 'profile':
-                    peerNickname = data.nickname || 'Karşı Taraf';
-                    document.getElementById('typingUser').innerText = peerNickname;
-                    appendSystemMessage(`${peerNickname} Sohbetsel odasına bağlandı.`);
-                    break;
-
-                case 'text':
-                    appendMessage({
-                        sender: peerNickname,
-                        content: data.content,
-                        time: data.time,
-                        isMe: false
-                    });
-                    playChimeSound();
-                    break;
-
-                case 'image':
-                    appendImageMessage({
-                        sender: peerNickname,
-                        imageData: data.imageData,
-                        time: data.time,
-                        isMe: false
-                    });
-                    playChimeSound();
-                    break;
-
-                case 'typing':
-                    handleTypingIndicator(data.isTyping);
-                    break;
+        // Mesaj Gönderme Butonu
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (text && conn && conn.open) {
+                conn.send(text);
+                addMessage(text, 'sent');
+                msgInput.value = '';
+            } else if (!conn || !conn.open) {
+                alert("Henüz kimseyle bağlı değilsin! Linki arkadaşına gönderip bağlanmasını bekle.");
             }
         }
 
-        // Mesaj Gönderme İşlemi
-        function handleSend(e) {
-            e.preventDefault();
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
+        sendBtn.addEventListener('click', sendMessage);
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
-            if (!message) return;
-
-            if (!conn || !conn.open) {
-                showToast('Henüz odaya bağlı bir kullanıcı yok! Lütfen sohbet linkini kopyalayıp paylaşın.', 'warning');
-                return;
-            }
-
-            const timeStr = getCurrentTime();
-
-            // Karşı tarafa ilet
-            conn.send({
-                type: 'text',
-                content: message,
-                time: timeStr
+        // Link Kopyalama Butonu
+        copyBtn.addEventListener('click', () => {
+            if (!myRoomId) return alert("Bağlantı henüz hazır değil, 1 saniye bekle.");
+            
+            const baseUrl = window.location.href.split('?')[0];
+            const inviteLink = baseUrl + "?room=" + myRoomId;
+            
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "Kopyalandı!";
+                setTimeout(() => { copyBtn.innerText = originalText; }, 2000);
             });
+        });
 
-            // Kendi ekranında göster
-            appendMessage({
-                sender: myNickname,
-                content: message,
-                time: timeStr,
-                isMe: true
-            });
-
-            input.value = '';
-            closeEmojiPicker();
-            sendTypingStatus(false);
-        }
-
-        // Görsel Paylaşımı
-        function handleImageSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (!conn || !conn.open) {
-                showToast('Görsel göndermek için bağlı bir üye olmalıdır.', 'warning');
-                return;
-            }
-
-            if (file.size > 3 * 1024 * 1024) {
-                showToast('Dosya boyutu çok yüksek. Maksimum 3MB gönderebilirsiniz.', 'warning');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const imageData = event.target.result;
-                const timeStr = getCurrentTime();
-
-                conn.send({
-                    type: 'image',
-                    imageData: imageData,
-                    time: timeStr
-                });
-
-                appendImageMessage({
-                    sender: myNickname,
-                    imageData: imageData,
-                    time: timeStr,
-                    isMe: true
-                });
-
-                showToast('Görsel başarıyla iletildi.', 'info');
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        // Arayüze Mesaj Ekleme
-        function appendMessage({ sender, content, time, isMe }) {
-            const container = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 animate-in fade-in duration-150`;
-
-            const bubbleBg = isMe 
-                ? 'bg-gradient-to-r from-brand-700 to-indigo-600 text-white rounded-2xl rounded-tr-none shadow-md shadow-indigo-950/30' 
-                : 'glass-panel text-slate-100 rounded-2xl rounded-tl-none border border-slate-700/60';
-
-            msgDiv.innerHTML = `
-                <span class="text-[10px] text-slate-400 px-1 font-semibold">${escapeHTML(sender)}</span>
-                <div class="max-w-[85%] sm:max-w-[70%] px-4 py-2.5 ${bubbleBg} break-words text-sm leading-relaxed">
-                    ${escapeHTML(content)}
-                </div>
-                <span class="text-[9px] text-slate-500 px-1 font-mono">${time}</span>
-            `;
-
-            container.appendChild(msgDiv);
-            scrollToBottom();
-        }
-
-        function appendImageMessage({ sender, imageData, time, isMe }) {
-            const container = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 animate-in fade-in duration-150`;
-
-            const borderStyle = isMe ? 'border-indigo-500/30' : 'border-slate-700/60';
-
-            msgDiv.innerHTML = `
-                <span class="text-[10px] text-slate-400 px-1 font-semibold">${escapeHTML(sender)}</span>
-                <div class="max-w-[85%] sm:max-w-[60%] p-1.5 glass-card rounded-2xl ${borderStyle} overflow-hidden shadow-xl">
-                    <img src="${imageData}" alt="Paylaşılan Görsel" class="rounded-xl w-full max-h-72 object-cover cursor-pointer hover:opacity-90 transition" onclick="window.open('${imageData}')">
-                </div>
-                <span class="text-[9px] text-slate-500 px-1 font-mono">${time}</span>
-            `;
-
-            container.appendChild(msgDiv);
-            scrollToBottom();
-        }
-
-        function appendSystemMessage(text) {
-            const container = document.getElementById('chatMessages');
-            const sysDiv = document.createElement('div');
-            sysDiv.className = 'text-center my-2 animate-in fade-in duration-200';
-            sysDiv.innerHTML = `
-                <span class="text-[11px] font-medium bg-slate-800/60 text-slate-400 px-3.5 py-1 rounded-full border border-slate-700/40">
-                    <i class="fa-solid fa-circle-info text-indigo-400 mr-1.5"></i> ${escapeHTML(text)}
-                </span>
-            `;
-            container.appendChild(sysDiv);
-            scrollToBottom();
-        }
-
-        // "Yazıyor..." Bilgisi
-        function handleTyping() {
-            if (!conn || !conn.open) return;
-            sendTypingStatus(true);
-
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                sendTypingStatus(false);
-            }, 2000);
-        }
-
-        function sendTypingStatus(isTyping) {
-            if (conn && conn.open) {
-                conn.send({
-                    type: 'typing',
-                    isTyping: isTyping
-                });
-            }
-        }
-
-        function handleTypingIndicator(isTyping) {
-            const indicator = document.getElementById('typingIndicator');
-            if (isTyping) {
-                indicator.classList.remove('hidden');
-                indicator.classList.add('flex');
-            } else {
-                indicator.classList.add('hidden');
-                indicator.classList.remove('flex');
-            }
-            scrollToBottom();
-        }
-
-        // Ses Efekti (Web Audio API Chime)
-        function playChimeSound() {
+        // Gelen Mesaj Sesi
+        function playChime() {
             try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (!AudioCtx) return;
-                const ctx = new AudioCtx();
-                
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.09); // G5
-
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-
                 osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } catch (e) {
-                // AudioContext engellenirse sessiz geç
-            }
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notlarım</title>
+    <!-- P2P Bağlantısı için PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        /* GENEL AYARLAR */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f4f9; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+
+        /* MASKE: NOT DEFTERİ TASARIMI */
+        #notepad-app { height: 100vh; background-color: #fdfdfd; display: flex; flex-direction: column; }
+        .np-header { background-color: #ffcc00; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; cursor: pointer; user-select: none; }
+        .np-search { padding: 15px; background: #eee; }
+        .np-search input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        .np-notes { flex: 1; padding: 20px; overflow-y: auto; background: repeating-linear-gradient(#fdfdfd, #fdfdfd 29px, #e1e1e1 30px); line-height: 30px; font-size: 18px; color: #333; }
+        .np-fab { position: absolute; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #ffcc00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; color: black; font-weight: bold; }
+
+        /* GİZLİ SOHBETSEL TASARIMI */
+        #chat-app { height: 100vh; background-color: #0d1117; color: #c9d1d9; display: flex; flex-direction: column; }
+        .chat-header { background-color: #161b22; padding: 15px 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        .chat-title { font-size: 20px; font-weight: bold; color: #58a6ff; }
+        .status { font-size: 12px; color: #8b949e; margin-top: 5px; }
+        .copy-btn { background-color: #238636; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 10px 15px; border-radius: 12px; font-size: 15px; word-wrap: break-word; }
+        .msg.sent { background-color: #1f6feb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background-color: #21262d; color: #c9d1d9; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #30363d; }
+        
+        .chat-input-area { padding: 15px; background-color: #161b22; border-top: 1px solid #30363d; display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 12px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; font-size: 15px; outline: none; }
+        .chat-input-area button { background-color: #1f6feb; color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. GÖRÜNÜM: SAHTE NOT DEFTERİ -->
+    <div id="notepad-app">
+        <!-- Gizli Tetikleyici: Bu başlığa 3 kere tıklanacak -->
+        <div class="np-header" id="np-header">📝 Notlarım</div>
+        
+        <div class="np-search">
+            <!-- Gizli Tetikleyici: Buraya 1234 yazılacak -->
+            <input type="text" id="np-search-input" placeholder="Notlarda ara...">
+        </div>
+        <div class="np-notes">
+            Marketten alınacaklar...<br>
+            Fizik formülleri özeti.<br>
+            Toplantı notları 14:00<br>
+        </div>
+        <div class="np-fab">+</div>
+    </div>
+
+    <!-- 2. GÖRÜNÜM: GERÇEK SOHBETSEL (Başlangıçta gizli) -->
+    <div id="chat-app" class="hidden">
+        <div class="chat-header">
+            <div>
+                <div class="chat-title">Sohbetsel</div>
+                <div class="status" id="status-text">Sistem başlatılıyor...</div>
+            </div>
+            <button class="copy-btn" id="copy-btn">Sohbet Linkini Kopyala</button>
+        </div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msg-input" placeholder="Güvenli mesaj yaz..." autocomplete="off">
+            <button id="send-btn">Gönder</button>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // MASKE (GİZLENME) KODLARI
+        // ----------------------------------------------------
+        const notepadApp = document.getElementById('notepad-app');
+        const chatApp = document.getElementById('chat-app');
+        const header = document.getElementById('np-header');
+        const searchInput = document.getElementById('np-search-input');
+        
+        let clickCount = 0;
+        let clickTimer;
+
+        // Sohbeti Gösteren Fonksiyon
+        function revealChat() {
+            notepadApp.classList.add('hidden');
+            chatApp.classList.remove('hidden');
+            document.title = "Sohbetsel - Güvenli"; // Sekme adını değiştir
+            initChat(); // PeerJS'i başlat
         }
 
-        // Toast Bildirim Kutusu
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-
-            let bg = 'bg-slate-900/90 text-slate-100 border-slate-700';
-            let icon = 'fa-circle-info text-indigo-400';
-
-            if (type === 'success') {
-                bg = 'bg-slate-900/95 text-emerald-300 border-emerald-500/30';
-                icon = 'fa-circle-check text-emerald-400';
-            } else if (type === 'error') {
-                bg = 'bg-slate-900/95 text-rose-300 border-rose-500/30';
-                icon = 'fa-circle-exclamation text-rose-400';
-            } else if (type === 'warning') {
-                bg = 'bg-slate-900/95 text-amber-300 border-amber-500/30';
-                icon = 'fa-triangle-exclamation text-amber-400';
+        // Yöntem 1: Başlığa 3 kez tıklama
+        header.addEventListener('click', () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+            if (clickCount >= 3) {
+                revealChat();
+                clickCount = 0;
             }
+            clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
+        });
 
-            toast.className = `flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${bg}`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i> <span>${escapeHTML(message)}</span>`;
+        // Yöntem 2: Arama çubuğuna şifre (1234) yazma
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value === '1234') {
+                revealChat();
+                e.target.value = '';
+            }
+        });
 
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+        // EĞER SİTEYE LİNK İLE GELDİYSE DİREKT SOHBETİ AÇ (Maskeyi Es Geç)
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomToJoin = urlParams.get('room');
+        if (roomToJoin) {
+            revealChat();
         }
 
-        // Bağlantı Durumu Rozeti
-        function updateStatus(state, text) {
-            const badge = document.getElementById('statusBadge');
-            const statusText = document.getElementById('statusText');
+        // ----------------------------------------------------
+        // P2P SOHBET (PEERJS) KODLARI
+        // ----------------------------------------------------
+        let peer;
+        let conn;
+        const statusText = document.getElementById('status-text');
+        const messagesDiv = document.getElementById('messages');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        let myRoomId = '';
 
-            statusText.innerText = text;
-
-            if (state === 'connecting' || state === 'waiting') {
-                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold';
-                badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
-            } else if (state === 'connected') {
-                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold';
-                badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-emerald-400';
-            } else {
-                badge.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-semibold';
-                badge.querySelector('span').className = 'w-2 h-2 rounded-full bg-rose-400';
-            }
-        }
-
-        // Link Kopyalama
-        function copyShareLink() {
-            const link = window.location.href;
+        function initChat() {
+            if (peer) return; // Zaten çalışıyorsa durdur
             
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(link).then(() => {
-                    showToast('Sohbetsel oda linki kopyalandı!', 'success');
-                }).catch(() => {
-                    copyFallback(link);
-                });
-            } else {
-                copyFallback(link);
-            }
-        }
+            peer = new Peer(); // Ücretsiz P2P sunucusuna bağlan
 
-        function copyFallback(text) {
-            const dummy = document.createElement('input');
-            document.body.appendChild(dummy);
-            dummy.value = text;
-            dummy.select();
-            document.execCommand('copy');
-            document.body.removeChild(dummy);
-            showToast('Sohbetsel oda linki kopyalandı!', 'success');
-        }
-
-        // Emoji İşlemleri
-        function toggleEmojiPicker() {
-            document.getElementById('emojiPicker').classList.toggle('hidden');
-        }
-
-        function closeEmojiPicker() {
-            document.getElementById('emojiPicker').classList.add('hidden');
-        }
-
-        function insertEmoji(emoji) {
-            const input = document.getElementById('messageInput');
-            input.value += emoji;
-            input.focus();
-            closeEmojiPicker();
-        }
-
-        // Rumuz Ayarları
-        function toggleProfileModal() {
-            document.getElementById('profileModal').classList.toggle('hidden');
-        }
-
-        function saveNickname() {
-            const newNick = document.getElementById('nicknameInput').value.trim();
-            if (newNick) {
-                myNickname = newNick;
-                if (conn && conn.open) {
-                    conn.send({
-                        type: 'profile',
-                        nickname: myNickname
-                    });
+            peer.on('open', (id) => {
+                if (roomToJoin) {
+                    // MİSAFİR: Bir linke tıklayarak geldi.
+                    statusText.innerText = "Karşı tarafa bağlanılıyor...";
+                    conn = peer.connect(roomToJoin);
+                    setupConnection();
+                    copyBtn.style.display = 'none'; // Misafirin link kopyalamasına gerek yok
+                } else {
+                    // KURUCU: Kendi kendine gizli menüyü açtı.
+                    myRoomId = id;
+                    statusText.innerText = "Link kopyalayıp arkadaşına gönder.";
                 }
-                showToast(`Sohbetsel rumuzunuz "${myNickname}" olarak güncellendi.`, 'success');
+            });
+
+            // Kurucu için: Biri linke tıklayıp bağlandığında
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+            });
+        }
+
+        function setupConnection() {
+            // Bağlantı başarılı olduğunda
+            conn.on('open', () => {
+                statusText.innerText = "Bağlandı! Sohbet gizli ve şifrelidir.";
+                statusText.style.color = "#3fb950"; // Yeşil renk
+            });
+
+            // Karşıdan mesaj geldiğinde
+            conn.on('data', (data) => {
+                addMessage(data, 'received');
+                playChime(); // Ses çıkar
+            });
+            
+            // Karşı taraf çıkarsa
+            conn.on('close', () => {
+                statusText.innerText = "Bağlantı koptu. Karşı taraf sayfayı kapattı.";
+                statusText.style.color = "#f85149"; // Kırmızı renk
+            });
+        }
+
+        // Ekrana Mesaj Ekleme
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + type;
+            div.innerText = text;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Hep en alta kaydır
+        }
+
+        // Mesaj Gönderme Butonu
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (text && conn && conn.open) {
+                conn.send(text);
+                addMessage(text, 'sent');
+                msgInput.value = '';
+            } else if (!conn || !conn.open) {
+                alert("Henüz kimseyle bağlı değilsin! Linki arkadaşına gönderip bağlanmasını bekle.");
             }
-            toggleProfileModal();
         }
 
-        // Yardımcı Genel Metotlar
-        function generateRandomRoomId() {
-            return Math.random().toString(36).substring(2, 8);
-        }
+        sendBtn.addEventListener('click', sendMessage);
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
+        // Link Kopyalama Butonu
+        copyBtn.addEventListener('click', () => {
+            if (!myRoomId) return alert("Bağlantı henüz hazır değil, 1 saniye bekle.");
+            
+            const baseUrl = window.location.href.split('?')[0];
+            const inviteLink = baseUrl + "?room=" + myRoomId;
+            
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "Kopyalandı!";
+                setTimeout(() => { copyBtn.innerText = originalText; }, 2000);
+            });
+        });
 
-        function scrollToBottom() {
-            const container = document.getElementById('chatMessages');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+        // Gelen Mesaj Sesi
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
         }
     </script>
 </body>
