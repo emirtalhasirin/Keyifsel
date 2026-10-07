@@ -27,7 +27,10 @@
     </script>
 
     <style>
-        html, body { height: 100%; }
+        html, body { height: 100%; max-width: 100%; overflow: hidden; }
+        #app { position: fixed; top: 0; left: 0; right: 0; height: 100%; overflow: hidden; }
+        @supports (height: 100dvh) { #app { height: 100dvh; } }
+        #messages { overflow-x: hidden; }
         html { -webkit-text-size-adjust: 100%; }
         body { position: fixed; inset: 0; width: 100%; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
         button, label, a { touch-action: manipulation; }
@@ -66,7 +69,7 @@
 </head>
 <body class="text-slate-100 overflow-hidden selection:bg-brand-600 selection:text-white">
 
-<div id="app" class="w-full flex justify-center" style="height:100dvh">
+<div id="app" class="flex justify-center">
   <div class="w-full max-w-4xl h-full flex flex-col relative sm:border-x border-slate-800/70 bg-slate-950/40">
 
     <!-- ÜST BAR -->
@@ -137,7 +140,7 @@
 
         <!-- Üyeler çekmecesi -->
         <div id="membersBackdrop" class="hidden fixed inset-0 bg-black/50 z-30" onclick="toggleMembers()"></div>
-        <div id="membersPanel" class="fixed top-0 bottom-0 right-0 w-72 max-w-[85%] glass-panel z-40 shadow-2xl transition-transform duration-200 translate-x-full flex flex-col" style="padding-top:env(safe-area-inset-top)">
+        <div id="membersPanel" class="fixed top-0 bottom-0 right-0 w-72 max-w-[85%] glass-panel z-40 shadow-2xl transition-transform duration-200 translate-x-full invisible flex flex-col" style="padding-top:env(safe-area-inset-top)">
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
                 <h3 class="font-semibold text-sm"><i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-2"></i>Çevrimiçi (<span id="memberCount">0</span>)</h3>
                 <button onclick="toggleMembers()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -149,7 +152,7 @@
     
     <!-- YAZMA ALANI -->
     <div class="glass-panel px-2 pt-2 safe-b relative z-20">
-        <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl shadow-2xl grid grid-cols-8 gap-1 w-[calc(100vw-1rem)] max-w-sm z-30 pop"></div>
+        <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl shadow-2xl grid grid-cols-8 gap-1 right-2 sm:right-auto sm:w-80 z-30 pop"></div>
 
         <div class="flex items-end gap-2">
             <button type="button" onclick="toggleEmoji(event)" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition shrink-0" title="Emoji">
@@ -159,8 +162,8 @@
                 <i class="fa-solid fa-image text-lg"></i>
                 <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
             </label>
-            <textarea id="messageInput" rows="1" placeholder="Mesaj yaz…" autocomplete="off"
-                class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-base rounded-2xl px-4 py-2 outline-none border border-slate-700/60 focus:border-brand-500 transition max-h-32 leading-snug"></textarea>
+            <textarea id="messageInput" rows="1" cols="1" placeholder="Mesaj yaz…" autocomplete="off"
+                class="flex-1 min-w-0 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-base rounded-2xl px-4 py-2 outline-none border border-slate-700/60 focus:border-brand-500 transition max-h-32 leading-snug"></textarea>
             <button type="button" id="sendBtn" onclick="handleSend()" class="w-10 h-10 rounded-full bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center shadow-lg transition active:scale-95 shrink-0" title="Gönder">
                 <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
@@ -192,7 +195,7 @@
     <img id="lightboxImg" class="max-w-full max-h-full rounded-xl" alt="">
 </div>
 
-<div id="toastContainer" class="fixed top-16 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none items-center"></div>
+<div id="toastContainer" class="fixed top-20 inset-x-0 px-4 z-[70] flex flex-col gap-2 pointer-events-none items-center"></div>
 
 <script>
 /* ============================================================
@@ -732,8 +735,11 @@ function updateMembers() {
     updateSubtitle();
 }
 function toggleMembers() {
-    const open = $('membersPanel').classList.toggle('translate-x-full') === false;
-    $('membersBackdrop').classList.toggle('hidden', !open);
+    const p = $('membersPanel');
+    const opening = p.classList.contains('translate-x-full');
+    p.classList.toggle('translate-x-full', !opening);
+    p.classList.toggle('invisible', !opening);
+    $('membersBackdrop').classList.toggle('hidden', !opening);
 }
 function toggleMenu(e) { if (e) e.stopPropagation(); $('menuPanel').classList.toggle('hidden'); }
 function closeMenu() { $('menuPanel').classList.add('hidden'); }
@@ -887,7 +893,7 @@ function showToast(message, type = 'info') {
         warning: ['text-amber-300 border-amber-500/30', 'fa-triangle-exclamation text-amber-400']
     }[type] || [];
     const t = document.createElement('div');
-    t.className = `flex items-center gap-2.5 px-4 py-2.5 rounded-xl border bg-slate-900/95 text-xs font-semibold shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 -translate-y-2 ${palette[0]}`;
+    t.className = `flex items-center gap-2.5 max-w-full px-4 py-2.5 rounded-xl border bg-slate-900/95 text-xs font-semibold shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 -translate-y-2 ${palette[0]}`;
     t.innerHTML = `<i class="fa-solid ${palette[1]}"></i><span>${escapeHTML(message)}</span>`;
     $('toastContainer').appendChild(t);
     setTimeout(() => t.classList.remove('opacity-0', '-translate-y-2'), 10);
@@ -900,17 +906,20 @@ function showToast(message, type = 'info') {
 /* ---------- Mobil klavye / ekran yüksekliği ---------- */
 function fitViewport() {
     const vv = window.visualViewport;
-    if (!vv) return;
-    const near = isNearBottom();
     const app = $('app');
-    app.style.height = vv.height + 'px';
-    app.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : '';
+    const near = isNearBottom();
+    const h = vv ? vv.height : window.innerHeight;
+    app.style.height = Math.round(h) + 'px';
+    app.style.transform = (vv && vv.offsetTop) ? `translateY(${vv.offsetTop}px)` : '';
     if (near) { const l = $('messages'); l.scrollTop = l.scrollHeight; }
 }
 if (window.visualViewport) {
     visualViewport.addEventListener('resize', fitViewport);
     visualViewport.addEventListener('scroll', fitViewport);
 }
+window.addEventListener('resize', fitViewport);
+window.addEventListener('orientationchange', () => setTimeout(fitViewport, 200));
+fitViewport();
 input.addEventListener('focus', () => setTimeout(() => { fitViewport(); scrollToBottom(true); }, 300));
 
 window.addEventListener('online', () => { if (!stopped && connState !== 'connected') { clearTimeout(retryTimer); retryTimer = null; start(); } });
