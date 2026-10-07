@@ -2,38 +2,361 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <!-- Mobil uyumluluk için özel etiket (ekranın kaymasını/büyümesini engeller) -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Not Defteri</title>
-    <!-- P2P Bağlantısı için PeerJS -->
+    <!-- Mobil için hayati ayar: Yakınlaştırmayı ve kaymayı engeller, tam ekran yapar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Notlar</title>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #ffffff; height: 100vh; overflow: hidden; color: #333; }
+        /* GENEL AYARLAR */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f2f2f7; height: 100dvh; overflow: hidden; color: #000; touch-action: manipulation; }
         .hidden { display: none !important; }
+        button { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        /* --- NOT DEFTERİ MASKESİ (MOBİL UYUMLU) --- */
-        #notepad-app { height: 100vh; display: flex; flex-direction: row; background-color: #fff; }
+        /* --- GERÇEKÇİ MOBİL NOTLAR TASARIMI --- */
+        #view-list, #view-editor { height: 100dvh; display: flex; flex-direction: column; background-color: #f2f2f7; }
         
-        .np-sidebar { width: 300px; background-color: #f7f7f8; border-right: 1px solid #e1e1e3; display: flex; flex-direction: column; }
-        .np-sidebar-header { padding: 20px 16px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .np-sidebar-header h2 { font-size: 20px; font-weight: 600; color: #111; }
-        
-        .np-header-actions { display: flex; align-items: center; gap: 15px; }
-        /* Gizli Giriş Butonu */
-        .np-login-btn { background: none; border: none; font-size: 14px; font-weight: 600; color: #888; cursor: pointer; }
-        .np-new-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #007aff; font-weight: 300; line-height: 1; }
-        
-        .np-search-box { padding: 0 16px 12px; }
-        .np-search-box input { width: 100%; padding: 10px 12px; background-color: #e5e5ea; border: none; border-radius: 8px; font-size: 14px; outline: none; color: #333; }
-        
-        .np-list { flex: 1; overflow-y: auto; }
-        .np-item { padding: 12px 16px; border-bottom: 1px solid #efeff1; cursor: pointer; transition: background 0.2s; }
-        .np-item:hover, .np-item.active { background-color: #ebecf0; }
-        .np-item-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: #222; }
-        .np-item-snippet { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Üst Başlık (Header) */
+        .ios-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #f2f2f7; z-index: 10; }
+        .ios-header h1 { font-size: 34px; font-weight: 700; color: #000; margin-top: 10px; }
+        .header-btn { background: none; border: none; color: #d4a017; font-size: 17px; font-weight: 400; }
+        .secret-trigger { color: #d4a017; font-size: 17px; background: none; border: none; font-weight: 400; }
 
-        .np-editor-area { flex: 1; display: flex; flex-direction: column; background: #fff; }
-        .np-editor-top { padding: 16px; border-bottom: 1px solid #efeff1; display: flex; justify-content: flex-end; }
-        .np-delete-btn { background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 14px; font-weight: 500; }
-        .np-editor-content { flex: 1;
+        /* Arama Çubuğu */
+        .search-container { padding: 0 20px 15px; }
+        .search-bar { background-color: #e3e3e8; border-radius: 10px; padding: 8px 35px; width: 100%; border: none; font-size: 17px; outline: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%238e8e93" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>'); background-repeat: no-repeat; background-position: 10px center; }
+
+        /* Not Listesi */
+        .notes-list { flex: 1; overflow-y: auto; padding: 0 20px; }
+        .notes-container { background-color: #fff; border-radius: 10px; overflow: hidden; }
+        .note-item { padding: 12px 20px; border-bottom: 1px solid #e5e5ea; background: #fff; }
+        .note-item:last-child { border-bottom: none; }
+        .note-item:active { background-color: #e5e5ea; }
+        .note-title { font-size: 17px; font-weight: 600; color: #000; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .note-preview { font-size: 15px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Alt Araç Çubuğu (Toolbar) */
+        .ios-toolbar { background-color: #f9f9f9; border-top: 1px solid #d1d1d6; padding: 15px 20px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .notes-count { font-size: 12px; color: #333; }
+        .new-note-btn { background: none; border: none; color: #d4a017; font-size: 24px; font-weight: bold; }
+
+        /* Editör Ekranı */
+        #view-editor { background-color: #fff; }
+        .editor-header { display: flex; justify-content: space-between; padding: 15px 20px; background-color: #fff; border-bottom: 1px solid #f2f2f7; }
+        .editor-content { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        .edit-title { font-size: 24px; font-weight: 700; border: none; outline: none; margin-bottom: 15px; color: #000; }
+        .edit-body { flex: 1; font-size: 17px; border: none; outline: none; resize: none; line-height: 1.4; color: #333; }
+
+        /* --- ÖZEL ŞİFRE MODALI --- */
+        #password-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(5px); }
+        .modal-box { background: #f2f2f7; width: 280px; border-radius: 14px; text-align: center; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .modal-content { padding: 20px; }
+        .modal-box h3 { font-size: 17px; font-weight: 600; margin-bottom: 15px; }
+        .modal-box input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 18px; text-align: center; outline: none; -webkit-text-security: disc; }
+        .modal-actions { display: flex; border-top: 1px solid #ccc; }
+        .modal-btn { flex: 1; padding: 12px; border: none; background: none; font-size: 17px; color: #007aff; font-weight: 400; }
+        .modal-btn:first-child { border-right: 1px solid #ccc; font-weight: 600; color: #ff3b30; }
+
+        /* --- SOHBETSEL EKRANI --- */
+        #view-chat { height: 100dvh; background-color: #111; color: #fff; display: flex; flex-direction: column; }
+        .chat-header { background-color: #222; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .chat-title-group { display: flex; flex-direction: column; }
+        .chat-title { font-size: 17px; font-weight: 600; color: #34c759; }
+        .status { font-size: 12px; color: #8e8e93; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
+        .msg.sent { background-color: #34c759; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg.received { background-color: #333; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .chat-input-area { padding: 10px 15px 20px; background-color: #222; display: flex; gap: 10px; border-top: 1px solid #333; }
+        .chat-input-area input { flex: 1; padding: 12px 15px; border-radius: 20px; border: 1px solid #444; background: #000; color: #fff; outline: none; font-size: 15px; }
+        .chat-input-area button { background: #34c759; border: none; color: #fff; width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .icon-btn { font-size: 15px; background: none; border: none; color: #fff; padding: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. GÖRÜNÜM: NOT LİSTESİ -->
+    <div id="view-list" class="view">
+        <div class="ios-header">
+            <!-- GİZLİ TETİKLEYİCİ: Bu "Giriş" yazısına 5 kez basılacak -->
+            <button class="secret-trigger" id="secret-btn">Giriş</button>
+            <button class="header-btn" style="visibility:hidden">Düzenle</button>
+        </div>
+        <div style="padding: 0 20px;">
+            <h1 style="font-size: 34px; font-weight: bold; margin-bottom: 10px;">Notlar</h1>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-bar" id="search-input" placeholder="Ara">
+        </div>
+        <div class="notes-list">
+            <div class="notes-container" id="notes-list-container">
+                <!-- Notlar Buraya Eklenecek -->
+            </div>
+        </div>
+        <div class="ios-toolbar">
+            <span class="notes-count" id="notes-count-txt">1 Not</span>
+            <button class="new-note-btn" id="add-note-btn">📝</button>
+        </div>
+    </div>
+
+    <!-- 2. GÖRÜNÜM: NOT DÜZENLEYİCİ -->
+    <div id="view-editor" class="view hidden">
+        <div class="editor-header">
+            <button class="header-btn" id="back-to-list">❮ Notlar</button>
+            <button class="header-btn" id="delete-note" style="color: #ff3b30;">Sil</button>
+        </div>
+        <div class="editor-content">
+            <input type="text" class="edit-title" id="note-title" placeholder="Başlık">
+            <textarea class="edit-body" id="note-body" placeholder="Not yazmaya başlayın..."></textarea>
+        </div>
+    </div>
+
+    <!-- 3. GÖRÜNÜM: ŞİFRE EKRANI (Özel Modal) -->
+    <div id="password-modal" class="hidden">
+        <div class="modal-box">
+            <div class="modal-content">
+                <h3>Sistem Parolası</h3>
+                <input type="password" id="pin-input" placeholder="Parola" inputmode="numeric" maxlength="4">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" id="pin-cancel">İptal</button>
+                <button class="modal-btn" id="pin-submit">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. GÖRÜNÜM: GİZLİ SOHBETSEL -->
+    <div id="view-chat" class="view hidden">
+        <div class="chat-header">
+            <div class="chat-title-group">
+                <div class="chat-title">Sohbetsel P2P</div>
+                <div class="status" id="status-text">Bağlantı bekleniyor...</div>
+            </div>
+            <div>
+                <button class="icon-btn" id="copy-btn">🔗 Link</button>
+                <button class="icon-btn" id="lock-btn" style="color:#ff453a; margin-left:10px;">Kilitle</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msg-input" placeholder="Mesaj..." autocomplete="off">
+            <button id="send-btn">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GİZLİ GEÇİŞ (5 TIK VE 1874 ŞİFRESİ) ---
+        const secretBtn = document.getElementById('secret-btn');
+        const passModal = document.getElementById('password-modal');
+        const pinInput = document.getElementById('pin-input');
+        let clickCount = 0;
+        let clickTimer;
+
+        // 1. Aşama: 5 kez tıklama
+        secretBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            clickCount++;
+            clearTimeout(clickTimer);
+            
+            if (clickCount >= 5) {
+                clickCount = 0;
+                passModal.classList.remove('hidden');
+                pinInput.value = '';
+                setTimeout(() => pinInput.focus(), 100);
+            }
+            clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
+        });
+
+        // 2. Aşama: Şifre Kontrolü (1874)
+        document.getElementById('pin-submit').addEventListener('click', () => {
+            if (pinInput.value === "1874") {
+                passModal.classList.add('hidden');
+                document.getElementById('view-list').classList.add('hidden');
+                document.getElementById('view-editor').classList.add('hidden');
+                document.getElementById('view-chat').classList.remove('hidden');
+                document.body.style.backgroundColor = "#111"; // Sohbet arkaplan rengi
+                initChat(); // PeerJS'i başlat
+            } else {
+                alert("Hatalı parola!");
+                pinInput.value = '';
+            }
+        });
+
+        document.getElementById('pin-cancel').addEventListener('click', () => {
+            passModal.classList.add('hidden');
+            pinInput.value = '';
+        });
+
+        document.getElementById('lock-btn').addEventListener('click', () => {
+            document.getElementById('view-chat').classList.add('hidden');
+            document.getElementById('view-list').classList.remove('hidden');
+            document.body.style.backgroundColor = "#f2f2f7";
+        });
+
+        // EĞER LİNK İLE GELDİYSE DİREKT AÇ
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomToJoin = urlParams.get('room');
+        if (roomToJoin) {
+            document.getElementById('view-list').classList.add('hidden');
+            document.getElementById('view-chat').classList.remove('hidden');
+            document.body.style.backgroundColor = "#111";
+            initChat();
+        }
+
+        // --- GERÇEKÇİ NOT DEFTERİ İŞLEVLERİ ---
+        let notes = JSON.parse(localStorage.getItem('ios_notes')) || [
+            { id: 1, title: "Yeni Not", body: "Bu bir test notudur." }
+        ];
+        let activeNoteId = null;
+
+        const listContainer = document.getElementById('notes-list-container');
+        const titleInput = document.getElementById('note-title');
+        const bodyInput = document.getElementById('note-body');
+        const notesCountTxt = document.getElementById('notes-count-txt');
+
+        function renderNotes(filter = '') {
+            listContainer.innerHTML = '';
+            let count = 0;
+            notes.forEach(note => {
+                if (filter && !note.title.toLowerCase().includes(filter.toLowerCase()) && !note.body.toLowerCase().includes(filter.toLowerCase())) return;
+                count++;
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                div.innerHTML = `<div class="note-title">${note.title || 'Yeni Not'}</div><div class="note-preview">${note.body || 'Ek metin yok'}</div>`;
+                div.onclick = () => openEditor(note.id);
+                listContainer.appendChild(div);
+            });
+            notesCountTxt.innerText = `${count} Not`;
+        }
+
+        function openEditor(id) {
+            activeNoteId = id;
+            const note = notes.find(n => n.id === id);
+            titleInput.value = note.title;
+            bodyInput.value = note.body;
+            document.getElementById('view-list').classList.add('hidden');
+            document.getElementById('view-editor').classList.remove('hidden');
+        }
+
+        document.getElementById('back-to-list').onclick = () => {
+            document.getElementById('view-editor').classList.add('hidden');
+            document.getElementById('view-list').classList.remove('hidden');
+            renderNotes();
+        };
+
+        function saveNote() {
+            if(!activeNoteId) return;
+            const note = notes.find(n => n.id === activeNoteId);
+            note.title = titleInput.value;
+            note.body = bodyInput.value;
+            localStorage.setItem('ios_notes', JSON.stringify(notes));
+        }
+
+        titleInput.oninput = saveNote;
+        bodyInput.oninput = saveNote;
+
+        document.getElementById('add-note-btn').onclick = () => {
+            const newN = { id: Date.now(), title: '', body: '' };
+            notes.unshift(newN);
+            localStorage.setItem('ios_notes', JSON.stringify(notes));
+            openEditor(newN.id);
+        };
+
+        document.getElementById('delete-note').onclick = () => {
+            notes = notes.filter(n => n.id !== activeNoteId);
+            localStorage.setItem('ios_notes', JSON.stringify(notes));
+            document.getElementById('back-to-list').click();
+        };
+
+        document.getElementById('search-input').addEventListener('input', (e) => renderNotes(e.target.value));
+        if (!roomToJoin) renderNotes();
+
+        // --- P2P SOHBET (PEERJS) ---
+        let peer;
+        let conn;
+        const statusText = document.getElementById('status-text');
+        const messagesDiv = document.getElementById('messages');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        let myRoomId = '';
+
+        function initChat() {
+            if (peer) return;
+            peer = new Peer();
+            peer.on('open', (id) => {
+                if (roomToJoin) {
+                    statusText.innerText = "Bağlanılıyor...";
+                    conn = peer.connect(roomToJoin);
+                    setupConnection();
+                    document.getElementById('copy-btn').style.display = 'none';
+                } else {
+                    myRoomId = id;
+                    statusText.innerText = "Hazır. Linki kopyala.";
+                }
+            });
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+            });
+        }
+
+        function setupConnection() {
+            conn.on('open', () => {
+                statusText.innerText = "Bağlandı (Şifreli)";
+                statusText.style.color = "#34c759";
+            });
+            conn.on('data', (data) => {
+                addMessage(data, 'received');
+                playChime();
+            });
+            conn.on('close', () => {
+                statusText.innerText = "Karşı taraf ayrıldı.";
+                statusText.style.color = "#ff453a";
+            });
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + type;
+            div.innerText = text;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (text && conn && conn.open) {
+                conn.send(text);
+                addMessage(text, 'sent');
+                msgInput.value = '';
+            } else if (!conn || !conn.open) {
+                alert("Henüz sohbette kimse yok.");
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            if (!myRoomId) return alert("Bağlantı hazırlanıyor...");
+            const inviteLink = window.location.href.split('?')[0] + "?room=" + myRoomId;
+            navigator.clipboard.writeText(inviteLink).then(() => alert("Davet linki kopyalandı!"));
+        });
+
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>
