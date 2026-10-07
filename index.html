@@ -2,7 +2,7 @@
 <html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#0b1020">
     <title>Sohbetsel</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,6 +28,11 @@
 
     <style>
         html, body { height: 100%; }
+        html { -webkit-text-size-adjust: 100%; }
+        body { position: fixed; inset: 0; width: 100%; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+        button, label, a { touch-action: manipulation; }
+        #messages { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        .no-anim .pop { animation: none; }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #070b14;
@@ -61,28 +66,42 @@
 </head>
 <body class="text-slate-100 overflow-hidden selection:bg-brand-600 selection:text-white">
 
-<div class="h-[100dvh] w-full flex justify-center">
+<div id="app" class="w-full flex justify-center" style="height:100dvh">
   <div class="w-full max-w-4xl h-full flex flex-col relative sm:border-x border-slate-800/70 bg-slate-950/40">
 
     <!-- ÜST BAR -->
-    <header class="glass-panel safe-t px-3 pb-2.5 flex items-center gap-3 z-30 shadow-xl">
+    <header class="glass-panel safe-t relative px-3 pb-2.5 flex items-center gap-1.5 z-30 shadow-xl" style="padding-left:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right))">
         <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shrink-0">
-            <i class="fa-solid fa-users text-sm"></i>
+            <i class="fa-solid fa-comments"></i>
         </div>
-        <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleMembers()">
-            <h1 class="font-semibold text-[15px] leading-tight truncate">Sohbetsel Genel Oda</h1>
+        <div class="flex-1 min-w-0 ml-1.5 cursor-pointer" onclick="toggleMembers()">
+            <h1 class="font-semibold text-base leading-tight truncate">Sohbetsel</h1>
             <p id="subtitle" class="text-xs text-slate-400 truncate">bağlanılıyor…</p>
         </div>
-        <button id="soundBtn" onclick="toggleSound()" class="w-9 h-9 rounded-full hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Bildirim sesi">
-            <i class="fa-solid fa-bell"></i>
-        </button>
-        <button onclick="shareLink()" class="w-9 h-9 rounded-full hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Davet linkini kopyala">
+        <button onclick="shareLink()" class="w-10 h-10 rounded-full active:bg-slate-800 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition shrink-0" title="Davet linkini kopyala">
             <i class="fa-solid fa-user-plus"></i>
         </button>
-        <button onclick="toggleMembers()" class="w-9 h-9 rounded-full hover:bg-slate-800 text-slate-300 flex items-center justify-center transition" title="Kişiler">
-            <i class="fa-solid fa-address-book"></i>
+        <button onclick="toggleMembers()" class="relative w-10 h-10 rounded-full active:bg-slate-800 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition shrink-0" title="Kişiler">
+            <i class="fa-solid fa-user-group"></i>
+            <span id="memberBadge" class="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <button onclick="openProfile(false)" id="meAvatarBtn" class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shadow transition hover:scale-105" title="Profil"></button>
+        <button id="menuBtn" onclick="toggleMenu(event)" class="w-10 h-10 rounded-full active:bg-slate-800 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition shrink-0" title="Menü">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+
+        <div id="menuPanel" class="hidden absolute right-2 top-full mt-1 w-64 glass-panel rounded-2xl shadow-2xl z-50 p-1.5 pop">
+            <button onclick="closeMenu(); openProfile(false)" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl active:bg-slate-800 hover:bg-slate-800 text-left">
+                <span id="meAvatarBtn" class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"></span>
+                <span class="flex-1 min-w-0">
+                    <span id="menuName" class="block text-sm font-medium truncate"></span>
+                    <span class="block text-[11px] text-slate-400">Adı değiştir</span>
+                </span>
+            </button>
+            <button onclick="closeMenu(); toggleSound()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl active:bg-slate-800 hover:bg-slate-800 text-left text-sm">
+                <i id="soundIcon" class="fa-solid fa-bell w-9 text-center text-slate-300"></i>
+                <span id="soundLabel">Bildirim sesi: açık</span>
+            </button>
+        </div>
     </header>
 
     <!-- BAĞLANTI ŞERİDİ -->
@@ -102,13 +121,23 @@
             </div>
         </div>
 
+        <div id="typingBar" class="hidden absolute left-3 bottom-3 items-center gap-2 text-xs text-slate-300 bg-slate-800/95 border border-slate-700/60 rounded-full px-3 py-1.5 z-10 shadow-lg">
+            <span id="typingText" class="font-medium text-indigo-300"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-1"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-2"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-3"></span>
+            </div>
+        </div>
+
         <button id="scrollBtn" onclick="scrollToBottom(true)" class="hidden absolute right-4 bottom-4 w-10 h-10 rounded-full bg-slate-800 border border-slate-700 text-slate-200 shadow-xl items-center justify-center hover:bg-slate-700 transition">
             <i class="fa-solid fa-chevron-down"></i>
             <span id="unreadBadge" class="hidden absolute -top-2 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-brand-500 text-white text-[11px] font-bold items-center justify-center"></span>
         </button>
 
         <!-- Üyeler çekmecesi -->
-        <div id="membersPanel" class="absolute top-0 right-0 h-full w-72 max-w-[85%] glass-panel z-30 shadow-2xl transition-transform duration-200 translate-x-full flex flex-col">
+        <div id="membersBackdrop" class="hidden fixed inset-0 bg-black/50 z-30" onclick="toggleMembers()"></div>
+        <div id="membersPanel" class="fixed top-0 bottom-0 right-0 w-72 max-w-[85%] glass-panel z-40 shadow-2xl transition-transform duration-200 translate-x-full flex flex-col" style="padding-top:env(safe-area-inset-top)">
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
                 <h3 class="font-semibold text-sm"><i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-2"></i>Çevrimiçi (<span id="memberCount">0</span>)</h3>
                 <button onclick="toggleMembers()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -117,19 +146,10 @@
         </div>
     </div>
 
-    <!-- "Yazıyor" -->
-    <div id="typingBar" class="hidden items-center gap-2 text-xs text-slate-400 px-4 py-1">
-        <span id="typingText" class="font-medium text-indigo-400"></span>
-        <div class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-1"></span>
-            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-2"></span>
-            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full dot-3"></span>
-        </div>
-    </div>
-
+    
     <!-- YAZMA ALANI -->
     <div class="glass-panel px-2 pt-2 safe-b relative z-20">
-        <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl shadow-2xl grid grid-cols-8 gap-1 w-72 sm:w-80 z-30 pop"></div>
+        <div id="emojiPicker" class="hidden absolute bottom-full mb-2 left-2 glass-panel p-3 rounded-2xl shadow-2xl grid grid-cols-8 gap-1 w-[calc(100vw-1rem)] max-w-sm z-30 pop"></div>
 
         <div class="flex items-end gap-2">
             <button type="button" onclick="toggleEmoji(event)" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition shrink-0" title="Emoji">
@@ -140,7 +160,7 @@
                 <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
             </label>
             <textarea id="messageInput" rows="1" placeholder="Mesaj yaz…" autocomplete="off"
-                class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-[15px] rounded-2xl px-4 py-2.5 outline-none border border-slate-700/60 focus:border-brand-500 transition max-h-32 leading-snug"></textarea>
+                class="flex-1 bg-slate-900/90 text-slate-100 placeholder-slate-500 text-base rounded-2xl px-4 py-2 outline-none border border-slate-700/60 focus:border-brand-500 transition max-h-32 leading-snug"></textarea>
             <button type="button" id="sendBtn" onclick="handleSend()" class="w-10 h-10 rounded-full bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center shadow-lg transition active:scale-95 shrink-0" title="Gönder">
                 <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
@@ -150,7 +170,7 @@
 </div>
 
 <!-- PROFİL -->
-<div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-50 items-center justify-center p-4">
+<div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-50 items-start justify-center p-4 pt-[12vh]">
     <div class="glass-panel max-w-sm w-full p-6 rounded-2xl space-y-4 shadow-2xl pop">
         <div class="flex items-center gap-3">
             <div id="profileAvatar" class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white"></div>
@@ -597,9 +617,9 @@ function appendMsgEl(m) {
         const body = (m.content && !m.expired)
             ? `<img class="rounded-xl w-full max-h-72 object-cover cursor-zoom-in" alt="Fotoğraf">`
             : `<div class="px-3 py-6 text-xs text-slate-400 flex items-center gap-2"><i class="fa-regular fa-image"></i> Fotoğraf artık mevcut değil</div>`;
-        inner = `<div class="bubble w-64 sm:w-72 p-1 ${radius} ${skin}">${nameHTML ? `<div class="px-2 pt-1">${nameHTML}</div>` : ''}${body}<div class="meta-block">${timeOf(m.ts)}${tick}</div></div>`;
+        inner = `<div class="bubble w-64 max-w-[80%] sm:w-72 p-1 ${radius} ${skin}">${nameHTML ? `<div class="px-2 pt-1">${nameHTML}</div>` : ''}${body}<div class="meta-block">${timeOf(m.ts)}${tick}</div></div>`;
     } else {
-        inner = `<div class="bubble max-w-[78vw] sm:max-w-md px-3.5 py-2 ${radius} ${skin}">${nameHTML}<div class="text-[14.5px] leading-relaxed break-words whitespace-pre-wrap">${formatText(m.content)}</div><span class="meta">${timeOf(m.ts)}${tick}</span></div>`;
+        inner = `<div class="bubble max-w-[80%] min-w-0 sm:max-w-md px-3.5 py-2 ${radius} ${skin}">${nameHTML}<div class="text-[15px] leading-snug whitespace-pre-wrap" style="overflow-wrap:anywhere">${formatText(m.content)}</div><span class="meta">${timeOf(m.ts)}${tick}</span></div>`;
     }
 
     const avatar = mine ? '' : (grouped ? '<div class="w-8 shrink-0"></div>' : avatarHTML(name, color));
@@ -616,7 +636,9 @@ function renderAll() {
     const list = $('messages');
     list.innerHTML = '';
     lastMsg = null; lastDay = null;
+    list.classList.add('no-anim');
     messages.forEach(appendMsgEl);
+    list.classList.remove('no-anim');
     $('emptyState').classList.toggle('hidden', messages.length > 0);
     scrollToBottom(true);
 }
@@ -696,6 +718,7 @@ function updateSubtitle() {
 /* ---------- Üyeler ---------- */
 function updateMembers() {
     $('memberCount').textContent = users.size;
+    $('memberBadge').textContent = users.size;
     const box = $('membersList');
     const arr = [...users.values()].sort((a, b) => (a.id === me.id ? -1 : b.id === me.id ? 1 : a.nickname.localeCompare(b.nickname, 'tr')));
     box.innerHTML = arr.map(u => `
@@ -708,13 +731,19 @@ function updateMembers() {
         </div>`).join('') || '<p class="text-xs text-slate-500 p-3">Kimse yok.</p>';
     updateSubtitle();
 }
-function toggleMembers() { $('membersPanel').classList.toggle('translate-x-full'); }
+function toggleMembers() {
+    const open = $('membersPanel').classList.toggle('translate-x-full') === false;
+    $('membersBackdrop').classList.toggle('hidden', !open);
+}
+function toggleMenu(e) { if (e) e.stopPropagation(); $('menuPanel').classList.toggle('hidden'); }
+function closeMenu() { $('menuPanel').classList.add('hidden'); }
 
 /* ---------- Profil ---------- */
 function refreshMeAvatar() {
     const b = $('meAvatarBtn');
     b.style.background = colorFor(me.id);
     b.textContent = me.nickname.charAt(0).toUpperCase();
+    $('menuName').textContent = me.nickname;
 }
 function openProfile(first) {
     $('nicknameInput').value = me.nickname;
@@ -800,7 +829,10 @@ $('emojiPicker').addEventListener('click', (e) => {
 });
 function toggleEmoji(e) { e.stopPropagation(); $('emojiPicker').classList.toggle('hidden'); }
 function closeEmoji() { $('emojiPicker').classList.add('hidden'); }
-document.addEventListener('click', (e) => { if (!e.target.closest('#emojiPicker')) closeEmoji(); });
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#emojiPicker')) closeEmoji();
+    if (!e.target.closest('#menuPanel') && !e.target.closest('#menuBtn')) closeMenu();
+});
 
 /* ---------- Lightbox ---------- */
 function openLightbox(src) { $('lightboxImg').src = src; const l = $('lightbox'); l.classList.remove('hidden'); l.classList.add('flex'); }
@@ -823,7 +855,10 @@ function chime() {
     } catch (e) {}
 }
 function toggleSound() { muted = !muted; store.set('sohbetsel_muted', muted); refreshSoundBtn(); showToast(muted ? 'Bildirim sesi kapalı' : 'Bildirim sesi açık', 'info'); }
-function refreshSoundBtn() { $('soundBtn').innerHTML = `<i class="fa-solid ${muted ? 'fa-bell-slash' : 'fa-bell'}"></i>`; }
+function refreshSoundBtn() {
+    $('soundIcon').className = `fa-solid ${muted ? 'fa-bell-slash' : 'fa-bell'} w-9 text-center text-slate-300`;
+    $('soundLabel').textContent = 'Bildirim sesi: ' + (muted ? 'kapalı' : 'açık');
+}
 function notify(m) {
     if (!document.hidden || !('Notification' in window) || Notification.permission !== 'granted') return;
     try { new Notification(m.nickname, { body: m.kind === 'image' ? '📷 Fotoğraf' : m.content.slice(0, 120), tag: 'sohbetsel' }); } catch (e) {}
@@ -862,6 +897,22 @@ function showToast(message, type = 'info') {
 /* ============================================================
    BAŞLAT
    ============================================================ */
+/* ---------- Mobil klavye / ekran yüksekliği ---------- */
+function fitViewport() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const near = isNearBottom();
+    const app = $('app');
+    app.style.height = vv.height + 'px';
+    app.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : '';
+    if (near) { const l = $('messages'); l.scrollTop = l.scrollHeight; }
+}
+if (window.visualViewport) {
+    visualViewport.addEventListener('resize', fitViewport);
+    visualViewport.addEventListener('scroll', fitViewport);
+}
+input.addEventListener('focus', () => setTimeout(() => { fitViewport(); scrollToBottom(true); }, 300));
+
 window.addEventListener('online', () => { if (!stopped && connState !== 'connected') { clearTimeout(retryTimer); retryTimer = null; start(); } });
 window.addEventListener('beforeunload', () => { try { peer && peer.destroy(); } catch (e) {} });
 
